@@ -259,10 +259,17 @@ router.post(
         },
       });
 
-      const prompt = `
+      // Get job description from request body (optional)
+      // Multer automatically parses text fields from multipart/form-data into req.body
+      const jobDescription = (req.body && req.body.jobDescription) ? req.body.jobDescription.trim() : "";
+
+      let prompt = `
       You are an expert Resume Analyzer (ATS). 
       Use a deterministic rubric so identical resumes always produce identical scores.
       Evaluate each section independently before assigning the overall score.
+      
+      IMPORTANT: The ATS score (atsScore), section scores, missingInfo, and corrections must be based ONLY on the resume content itself. These scores should be IDENTICAL whether or not a job description is provided. Do NOT let the job description influence the general ATS score.
+      
       Return ONLY a valid JSON object with the following structure (no markdown fences):
       {
         "atsScore": number (0-100) derived as the average of the section scores mapped as High=90, Medium=70, Low=50 (round to the nearest whole number),
@@ -273,9 +280,40 @@ router.post(
             "Projects": "High" | "Medium" | "Low"
         },
         "missingInfo": ["string", "string"],
-        "corrections": ["string", "string"]
+        "corrections": ["string", "string"]`;
+
+      // Add JD matching fields if job description is provided
+      if (jobDescription && jobDescription.trim().length > 0) {
+        prompt += `,
+        "jdMatch": {
+          "similarityScore": number (0-100) representing how well the resume matches the job description,
+          "qualificationScore": number (0-100) representing how qualified the candidate is for this specific job,
+          "improvementSuggestions": ["string", "string"] - specific suggestions to improve the resume for this job description
+        }`;
       }
-      Missing info and corrections should reflect gaps that would improve ATS performance.
+
+      prompt += `
+      }
+      
+      STEP 1 - General ATS Analysis (INDEPENDENT of job description):
+      Analyze the resume text below and provide atsScore, sectionScores, missingInfo, and corrections based ONLY on the resume content. These scores should reflect general ATS best practices and should NOT be influenced by any job description.
+      Missing info and corrections should reflect gaps that would improve general ATS performance.`;
+
+      if (jobDescription && jobDescription.trim().length > 0) {
+        prompt += `
+      
+      STEP 2 - Job Description Matching Analysis (SEPARATE from general ATS score):
+      Additionally, analyze how well this resume matches the provided job description. This is a SEPARATE analysis that does NOT affect the atsScore calculated in Step 1. Provide:
+      - similarityScore: How similar the resume content is to the job requirements (0-100)
+      - qualificationScore: How qualified the candidate appears for this specific role (0-100)
+      - improvementSuggestions: Specific, actionable suggestions to tailor the resume for this job description
+      
+      Job Description:
+      ${jobDescription.trim()}`;
+      }
+
+      prompt += `
+      
       Resume Text (do not rephrase or summarize, just analyze):
       ${text}
     `;

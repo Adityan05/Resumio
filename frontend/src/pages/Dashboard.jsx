@@ -16,6 +16,7 @@ import ReactMarkdown from "react-markdown";
 
 const Dashboard = () => {
   const [file, setFile] = useState(null);
+  const [jobDescription, setJobDescription] = useState("");
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -73,6 +74,27 @@ const Dashboard = () => {
     setError("");
   };
 
+  const handleJobDescriptionChange = (e) => {
+    setJobDescription(e.target.value);
+    setError("");
+  };
+
+  const validateJobDescription = () => {
+    if (!jobDescription || jobDescription.trim().length === 0) {
+      return { isValid: true }; // Optional field, so empty is valid
+    }
+    const trimmed = jobDescription.trim();
+    const wordCount = trimmed.split(/\s+/).filter(word => word.length > 0).length;
+    
+    if (trimmed.length < 50) {
+      return { isValid: false, message: "Job description must be at least 50 characters long." };
+    }
+    if (wordCount < 10) {
+      return { isValid: false, message: "Job description must contain at least 10 words." };
+    }
+    return { isValid: true };
+  };
+
   const connectToProgressStream = (sessionId) => {
     const token = localStorage.getItem("token");
     const eventSource = new EventSource(
@@ -100,6 +122,14 @@ const Dashboard = () => {
 
   const handleUpload = async () => {
     if (!file) return;
+    
+    // Validate job description if provided
+    const jdValidation = validateJobDescription();
+    if (!jdValidation.isValid) {
+      setError(jdValidation.message);
+      return;
+    }
+    
     setLoading(true);
     setError("");
     setAnalysis(null);
@@ -118,6 +148,9 @@ const Dashboard = () => {
 
     const formData = new FormData();
     formData.append("resume", file);
+    if (jobDescription && jobDescription.trim().length > 0) {
+      formData.append("jobDescription", jobDescription.trim());
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -182,6 +215,7 @@ const Dashboard = () => {
 
   const resetAnalysis = () => {
     setFile(null);
+    setJobDescription("");
     setAnalysis(null);
     setError("");
   };
@@ -291,7 +325,7 @@ const Dashboard = () => {
                 Get instant AI feedback to improve your ATS score.
               </p>
 
-              <div className="max-w-xl mx-auto">
+              <div className="max-w-xl mx-auto space-y-6">
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 hover:border-indigo-500 transition-colors bg-gray-50">
                   <input
                     type="file"
@@ -317,6 +351,24 @@ const Dashboard = () => {
                       </span>
                     )}
                   </label>
+                </div>
+
+                {/* Job Description Matcher Field */}
+                <div className="text-left">
+                  <label htmlFor="job-description" className="block text-sm font-medium text-gray-700 mb-2">
+                    Job Description Matcher (Optional)
+                  </label>
+                  <textarea
+                    id="job-description"
+                    value={jobDescription}
+                    onChange={handleJobDescriptionChange}
+                    placeholder="Paste the job description here to get personalized matching scores and improvement suggestions..."
+                    rows={6}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Minimum 50 characters and 10 words if provided
+                  </p>
                 </div>
 
                 <button
@@ -466,6 +518,100 @@ const Dashboard = () => {
                     )
                   )}
               </div>
+
+              {/* Job Description Matching Section */}
+              {analysis.jdMatch && (
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm p-8 border-2 border-purple-200">
+                  <div className="flex items-center mb-6">
+                    <FileText className="h-8 w-8 text-purple-600 mr-3" />
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      Job Description Match Analysis
+                    </h2>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    {/* Similarity Score */}
+                    <div className="bg-white rounded-lg p-6 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">
+                        Similarity Score
+                      </h3>
+                      <p className="text-3xl font-bold text-purple-600 mb-1">
+                        {analysis.jdMatch.similarityScore}/100
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        How well your resume matches the job requirements
+                      </p>
+                      <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${
+                            analysis.jdMatch.similarityScore >= 80
+                              ? "bg-green-500"
+                              : analysis.jdMatch.similarityScore >= 60
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                          }`}
+                          style={{
+                            width: `${analysis.jdMatch.similarityScore}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Qualification Score */}
+                    <div className="bg-white rounded-lg p-6 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">
+                        Qualification Score
+                      </h3>
+                      <p className="text-3xl font-bold text-indigo-600 mb-1">
+                        {analysis.jdMatch.qualificationScore}/100
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        How qualified you appear for this specific role
+                      </p>
+                      <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full ${
+                            analysis.jdMatch.qualificationScore >= 80
+                              ? "bg-green-500"
+                              : analysis.jdMatch.qualificationScore >= 60
+                              ? "bg-yellow-500"
+                              : "bg-red-500"
+                          }`}
+                          style={{
+                            width: `${analysis.jdMatch.qualificationScore}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Improvement Suggestions */}
+                  {analysis.jdMatch.improvementSuggestions &&
+                    analysis.jdMatch.improvementSuggestions.length > 0 && (
+                      <div className="bg-white rounded-lg p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                          <CheckCircle className="h-5 w-5 text-purple-600 mr-2" />
+                          Improvement Suggestions for This Job
+                        </h3>
+                        <ul className="space-y-3">
+                          {analysis.jdMatch.improvementSuggestions.map(
+                            (suggestion, idx) => (
+                              <li
+                                key={idx}
+                                className="flex items-start text-gray-700"
+                              >
+                                <span className="mr-3 mt-1.5 h-1.5 w-1.5 bg-purple-400 rounded-full shrink-0"></span>
+                                <div className="prose prose-sm max-w-none">
+                                  <ReactMarkdown>{suggestion}</ReactMarkdown>
+                                </div>
+                              </li>
+                            )
+                          )}
+                        </ul>
+                      </div>
+                    )}
+                </div>
+              )}
 
               {/* Improvements Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
