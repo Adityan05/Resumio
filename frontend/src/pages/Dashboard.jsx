@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { API_URL } from "../config";
 import {
   Upload,
   FileText,
@@ -11,6 +12,8 @@ import {
   LogOut,
   History,
   RotateCcw,
+  FileCheck,
+  Coins,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
@@ -37,6 +40,7 @@ const Dashboard = () => {
     } else {
       setUser(JSON.parse(storedUser));
       fetchHistory();
+      fetchUserCredits(); // Fetch credits from server on mount
     }
   }, [navigate]);
 
@@ -53,12 +57,35 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) return;
-      const res = await axios.get("http://localhost:3000/api/user/history", {
+      const res = await axios.get(`${API_URL}/api/user/history`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setHistory(res.data);
     } catch (err) {
       console.error("Failed to fetch history", err);
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        handleAuthFailure("Session expired. Please log in again.");
+      }
+    }
+  };
+
+  const fetchUserCredits = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const res = await axios.get(`${API_URL}/api/user/credits`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.data.credits !== undefined) {
+        // Get current user from state or localStorage
+        const currentUser =
+          user || JSON.parse(localStorage.getItem("user") || "{}");
+        const updatedUser = { ...currentUser, credits: res.data.credits };
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+      }
+    } catch (err) {
+      console.error("Failed to fetch user credits", err);
       if (err.response?.status === 401 || err.response?.status === 403) {
         handleAuthFailure("Session expired. Please log in again.");
       }
@@ -84,13 +111,21 @@ const Dashboard = () => {
       return { isValid: true }; // Optional field, so empty is valid
     }
     const trimmed = jobDescription.trim();
-    const wordCount = trimmed.split(/\s+/).filter(word => word.length > 0).length;
-    
+    const wordCount = trimmed
+      .split(/\s+/)
+      .filter((word) => word.length > 0).length;
+
     if (trimmed.length < 50) {
-      return { isValid: false, message: "Job description must be at least 50 characters long." };
+      return {
+        isValid: false,
+        message: "Job description must be at least 50 characters long.",
+      };
     }
     if (wordCount < 10) {
-      return { isValid: false, message: "Job description must contain at least 10 words." };
+      return {
+        isValid: false,
+        message: "Job description must contain at least 10 words.",
+      };
     }
     return { isValid: true };
   };
@@ -98,7 +133,7 @@ const Dashboard = () => {
   const connectToProgressStream = (sessionId) => {
     const token = localStorage.getItem("token");
     const eventSource = new EventSource(
-      `http://localhost:3000/api/analyze/progress/${sessionId}?token=${token}`
+      `${API_URL}/api/analyze/progress/${sessionId}?token=${token}`
     );
 
     eventSource.onmessage = (event) => {
@@ -122,14 +157,25 @@ const Dashboard = () => {
 
   const handleUpload = async () => {
     if (!file) return;
-    
+
     // Validate job description if provided
     const jdValidation = validateJobDescription();
     if (!jdValidation.isValid) {
       setError(jdValidation.message);
       return;
     }
-    
+
+    // Fetch current credits from server before upload
+    await fetchUserCredits();
+
+    // Check if user has enough credits
+    if (user && (user.credits || 0) < 10) {
+      setError(
+        "Insufficient credits. You need 10 credits to analyze a resume."
+      );
+      return;
+    }
+
     setLoading(true);
     setError("");
     setAnalysis(null);
@@ -154,36 +200,33 @@ const Dashboard = () => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post(
-        "http://localhost:3000/api/analyze",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-            "X-Session-Id": sessionId,
-          },
-          onUploadProgress: (event) => {
-            if (!event.total) {
-              setStatusMessage("Uploading resume...");
-              return;
-            }
-            const ratio = event.loaded / event.total;
-            const percent = Math.min(100, Math.round(ratio * 100));
-            setUploadProgress(percent);
-            setProgressPercent(Math.min(15, percent * 0.15)); // Upload is 15% of total
-            setStatusMessage(`Uploading resume... ${percent}%`);
+      const res = await axios.post(`${API_URL}/api/analyze`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+          "X-Session-Id": sessionId,
+        },
+        onUploadProgress: (event) => {
+          if (!event.total) {
+            setStatusMessage("Uploading resume...");
+            return;
+          }
+          const ratio = event.loaded / event.total;
+          const percent = Math.min(100, Math.round(ratio * 100));
+          setUploadProgress(percent);
+          setProgressPercent(Math.min(15, percent * 0.15)); // Upload is 15% of total
+          setStatusMessage(`Uploading resume... ${percent}%`);
 
-            if (percent >= 100) {
-              setStatusMessage("Upload complete. Processing...");
-              setProgressPercent(18);
-            }
-          },
-        }
-      );
+          if (percent >= 100) {
+            setStatusMessage("Upload complete. Processing...");
+            setProgressPercent(18);
+          }
+        },
+      });
 
       setAnalysis(res.data);
       fetchHistory(); // Refresh history
+      fetchUserCredits(); // Refresh credits from server
 
       // Clean up
       eventSource.close();
@@ -196,12 +239,18 @@ const Dashboard = () => {
       }, 2000);
     } catch (err) {
       console.error(err);
-      setError(
+      const errorMessage =
         err.response?.data?.error ||
-          "Failed to analyze resume. Please try again."
-      );
+        "Failed to analyze resume. Please try again.";
+      setError(errorMessage);
+
       if (err.response?.status === 401 || err.response?.status === 403) {
         handleAuthFailure("Session expired. Please log in again.");
+      } else if (err.response?.status === 402) {
+        // Payment required - insufficient credits
+        setProcessingPhase("error");
+        setStatusMessage("Insufficient credits");
+        setProgressPercent(0);
       } else {
         setProcessingPhase("error");
         setStatusMessage("Analysis failed");
@@ -225,52 +274,70 @@ const Dashboard = () => {
       {/* Header */}
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center h-auto sm:h-16 py-3 sm:py-0 gap-3 sm:gap-0">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-indigo-600">
-                AI Resume Analyzer
-              </h1>
+              <div className="flex items-center space-x-2">
+                <FileCheck className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600" />
+                <h1 className="text-xl sm:text-2xl font-bold text-indigo-600">
+                  Resumio
+                </h1>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto justify-between sm:justify-end">
               {user && (
-                <div className="flex items-center space-x-2 text-gray-700">
-                  <User className="h-5 w-5" />
-                  <span className="font-medium">{user.name}</span>
-                </div>
+                <>
+                  <div className="flex items-center space-x-2 text-gray-700 bg-yellow-50 px-2 sm:px-3 py-1 rounded-lg border border-yellow-200">
+                    <Coins className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-600" />
+                    <span className="text-sm sm:text-base font-semibold text-yellow-900">
+                      {user.credits || 0}
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-2 text-gray-700">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5" />
+                    <span className="text-sm sm:text-base font-medium hidden sm:inline">
+                      {user.name}
+                    </span>
+                    <span className="text-xs sm:hidden font-medium">
+                      {user.name?.split(" ")[0] || "User"}
+                    </span>
+                  </div>
+                </>
               )}
               <button
                 onClick={() => setShowHistory(!showHistory)}
                 className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
                 title="History"
               >
-                <History className="h-6 w-6" />
+                <History className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-500 hover:text-red-600 transition-colors"
                 title="Logout"
               >
-                <LogOut className="h-6 w-6" />
+                <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
             </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      <main className="max-w-4xl mx-auto py-6 sm:py-10 px-4 sm:px-6 lg:px-8">
         {/* History Modal/Section */}
         {showHistory && (
-          <div className="mb-8 bg-white rounded-xl shadow-sm p-6 animate-fade-in">
+          <div className="mb-6 sm:mb-8 bg-white rounded-xl shadow-sm p-4 sm:p-6 animate-fade-in">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold text-gray-900">Recent Scans</h2>
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+                Recent Scans
+              </h2>
               <button
                 onClick={() => setShowHistory(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 text-sm sm:text-base"
               >
                 Close
               </button>
             </div>
-            <div className="overflow-hidden">
+            <div className="overflow-x-auto">
               {history.length > 0 ? (
                 <ul className="divide-y divide-gray-200">
                   {history.map((item) => {
@@ -287,10 +354,10 @@ const Dashboard = () => {
                     return (
                       <li
                         key={item.id}
-                        className="py-3 flex justify-between items-center"
+                        className="py-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0"
                       >
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-sm font-medium text-gray-900 truncate">
                             {item.fileName}
                           </p>
                           <p className="text-xs text-gray-500">
@@ -298,7 +365,7 @@ const Dashboard = () => {
                           </p>
                         </div>
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}`}
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium shrink-0 ${badgeClass}`}
                         >
                           Score: {numericScore !== null ? numericScore : "N/A"}
                         </span>
@@ -355,7 +422,10 @@ const Dashboard = () => {
 
                 {/* Job Description Matcher Field */}
                 <div className="text-left">
-                  <label htmlFor="job-description" className="block text-sm font-medium text-gray-700 mb-2">
+                  <label
+                    htmlFor="job-description"
+                    className="block text-sm font-medium text-gray-700 mb-2"
+                  >
                     Job Description Matcher (Optional)
                   </label>
                   <textarea
@@ -443,22 +513,22 @@ const Dashboard = () => {
           {analysis && (
             <div className="space-y-6 animate-fade-in">
               {/* Score Header */}
-              <div className="bg-white rounded-xl shadow-sm p-8 flex flex-col md:flex-row items-center justify-between border-l-8 border-indigo-600">
-                <div>
-                  <h2 className="text-3xl font-bold text-gray-900">
+              <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between border-l-4 sm:border-l-8 border-indigo-600">
+                <div className="w-full md:w-auto text-center md:text-left mb-4 md:mb-0">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
                     Analysis Results
                   </h2>
-                  <p className="text-gray-500 mt-1">
+                  <p className="text-gray-500 mt-1 text-sm sm:text-base">
                     Here is how your resume performs.
                   </p>
                 </div>
                 <div className="mt-4 md:mt-0 flex items-center">
                   <div className="text-right mr-4">
-                    <p className="text-sm text-gray-500 uppercase tracking-wide font-semibold">
+                    <p className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide font-semibold">
                       Resume Score
                     </p>
                     <p
-                      className={`text-5xl font-extrabold ${
+                      className={`text-4xl sm:text-5xl font-extrabold ${
                         analysis.atsScore >= 80
                           ? "text-green-600"
                           : analysis.atsScore >= 60
@@ -470,7 +540,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                   <div
-                    className={`h-16 w-16 rounded-full flex items-center justify-center ${
+                    className={`h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center shrink-0 ${
                       analysis.atsScore >= 80
                         ? "bg-green-100"
                         : analysis.atsScore >= 60
@@ -479,7 +549,7 @@ const Dashboard = () => {
                     }`}
                   >
                     <CheckCircle
-                      className={`h-8 w-8 ${
+                      className={`h-6 w-6 sm:h-8 sm:w-8 ${
                         analysis.atsScore >= 80
                           ? "text-green-600"
                           : analysis.atsScore >= 60
@@ -492,7 +562,7 @@ const Dashboard = () => {
               </div>
 
               {/* Section Scores */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-3 sm:gap-4">
                 {analysis.sectionScores &&
                   Object.entries(analysis.sectionScores).map(
                     ([section, score]) => (
@@ -528,7 +598,7 @@ const Dashboard = () => {
                       Job Description Match Analysis
                     </h2>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     {/* Similarity Score */}
                     <div className="bg-white rounded-lg p-6 shadow-sm">
@@ -614,7 +684,7 @@ const Dashboard = () => {
               )}
 
               {/* Improvements Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Missing Info */}
                 <div className="bg-white rounded-xl shadow-sm p-6 border-t-4 border-red-400">
                   <div className="flex items-center mb-4">

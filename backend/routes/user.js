@@ -35,4 +35,23 @@ router.get('/history', authenticateToken, async (req, res) => {
     }
 });
 
+router.get('/credits', authenticateToken, async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            select: { credits: true }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json({ credits: user.credits || 0 });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch credits' });
+    }
+});
+
 module.exports = router;

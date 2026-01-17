@@ -16,7 +16,12 @@ RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # ---- Expose port ----
-EXPOSE 8080
+EXPOSE 8000
 
-# ---- Start server ----
-CMD ["gunicorn", "main:app", "--bind", "0.0.0.0:8080"]
+# ---- Set environment variables ----
+ENV FLASK_DEBUG=False
+ENV PORT=8000
+
+# ---- Start server (production) ----
+# Most platforms will use this, or you can override with your platform's command
+CMD ["python", "main.py"]

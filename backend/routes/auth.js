@@ -13,7 +13,12 @@ router.post('/register', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = await prisma.user.create({
-            data: { email, password: hashedPassword, name },
+            data: { 
+                email, 
+                password: hashedPassword, 
+                name,
+                credits: 50 // New users get 50 credits by default
+            },
         });
 
         res.status(201).json({ message: 'User created', userId: user.id });
@@ -32,7 +37,7 @@ router.post('/login', async (req, res) => {
         if (!validPassword) return res.status(400).json({ error: 'Invalid credentials' });
 
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-        res.json({ token, user: { id: user.id, name: user.name, email: user.email } });
+        res.json({ token, user: { id: user.id, name: user.name, email: user.email, credits: user.credits } });
     } catch (error) {
         res.status(500).json({ error: 'Internal server error' });
     }

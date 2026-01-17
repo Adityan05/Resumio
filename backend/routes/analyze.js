@@ -156,8 +156,26 @@ router.post(
   async (req, res) => {
     let filePath;
     const sessionId = req.headers['x-session-id'] || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const userId = req.user.userId;
+    const CREDITS_PER_SCAN = 10;
     
     try {
+      // Check if user has enough credits
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { credits: true }
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      if (user.credits < CREDITS_PER_SCAN) {
+        return res.status(402).json({ 
+          error: `Insufficient credits. You need ${CREDITS_PER_SCAN} credits to analyze a resume. You currently have ${user.credits} credits.` 
+        });
+      }
+
       if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
       if (req.file.size > MAX_UPLOAD_SIZE_BYTES) {
@@ -351,9 +369,18 @@ router.post(
         }
       }
 
-      // 4. Save to DB + enforce rolling history (max 50 per user)
-      const userId = req.user.userId;
+      // 4. Save to DB + enforce rolling history (max 50 per user) + deduct credits
       await prisma.$transaction(async (tx) => {
+        // Deduct credits
+        await tx.user.update({
+          where: { id: userId },
+          data: {
+            credits: {
+              decrement: CREDITS_PER_SCAN
+            }
+          }
+        });
+
         const resume = await tx.resume.create({
           data: {
             userId: userId,

@@ -12,6 +12,7 @@ model User {
   email     String   @unique
   password  String
   name      String?
+  credits   Int      @default(50)
   createdAt DateTime @default(now())
   resumes   Resume[]
 }
