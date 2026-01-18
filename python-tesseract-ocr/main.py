@@ -37,14 +37,25 @@ def ocr_only():
             return jsonify({'error': 'No file provided'}), 400
         
         file = request.files['file']
-        if file.filename == '':
-            return jsonify({'error': 'No file selected'}), 400
         
-        # Validate file type
-        if not file.filename.lower().endswith('.pdf'):
-            return jsonify({'error': 'Only PDF files are supported'}), 400
-        
+        # More lenient validation: check if file has content
+        # Filename might be empty when sent from backend, but file content exists
         pdf_bytes = file.read()
+        
+        # Check if file is empty
+        if len(pdf_bytes) == 0:
+            return jsonify({'error': 'No file selected or file is empty'}), 400
+        
+        # Validate file type - check filename if available, otherwise check content
+        if file.filename:
+            # If filename is provided, validate extension
+            if not file.filename.lower().endswith('.pdf'):
+                return jsonify({'error': 'Only PDF files are supported'}), 400
+        else:
+            # If no filename, check content type or magic bytes
+            # PDF files start with %PDF
+            if not pdf_bytes[:4] == b'%PDF':
+                return jsonify({'error': 'File does not appear to be a valid PDF'}), 400
         
         # Validate file size (max 10MB)
         max_size = 10 * 1024 * 1024  # 10MB

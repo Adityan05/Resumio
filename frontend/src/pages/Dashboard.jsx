@@ -275,7 +275,7 @@ const Dashboard = () => {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center h-auto sm:h-16 py-3 sm:py-0 gap-3 sm:gap-0">
-            <div className="flex items-center">
+            <div className="flex items-center" onClick={() => navigate("/")}>
               <div className="flex items-center space-x-2">
                 <FileCheck className="h-6 w-6 sm:h-7 sm:w-7 text-indigo-600" />
                 <h1 className="text-xl sm:text-2xl font-bold text-indigo-600">
@@ -292,7 +292,7 @@ const Dashboard = () => {
                       {user.credits || 0}
                     </span>
                   </div>
-                  <div className="flex items-center space-x-2 text-gray-700">
+                  <div className="flex items-center space-x-2 text-gray-700 ">
                     <User className="h-4 w-4 sm:h-5 sm:w-5" />
                     <span className="text-sm sm:text-base font-medium hidden sm:inline">
                       {user.name}
@@ -303,16 +303,17 @@ const Dashboard = () => {
                   </div>
                 </>
               )}
+              
               <button
                 onClick={() => setShowHistory(!showHistory)}
-                className="p-2 text-gray-500 hover:text-indigo-600 transition-colors"
+                className="p-2 text-gray-500  hover:text-indigo-600  transition-colors"
                 title="History"
               >
                 <History className="h-5 w-5 sm:h-6 sm:w-6" />
               </button>
               <button
                 onClick={handleLogout}
-                className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+                className="p-2 text-gray-500  hover:text-red-600  transition-colors"
                 title="Logout"
               >
                 <LogOut className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -327,12 +328,12 @@ const Dashboard = () => {
         {showHistory && (
           <div className="mb-6 sm:mb-8 bg-white rounded-xl shadow-sm p-4 sm:p-6 animate-fade-in">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg sm:text-xl font-bold text-gray-900">
+              <h2 className="text-lg sm:text-xl font-bold text-gray-900 ">
                 Recent Scans
               </h2>
               <button
                 onClick={() => setShowHistory(false)}
-                className="text-gray-400 hover:text-gray-600 text-sm sm:text-base"
+                className="text-gray-400  hover:text-gray-600 text-sm sm:text-base"
               >
                 Close
               </button>
@@ -346,11 +347,11 @@ const Dashboard = () => {
                     const badgeClass =
                       numericScore !== null
                         ? numericScore >= 80
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-green-100  text-green-800 "
                           : numericScore >= 60
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                        : "bg-gray-100 text-gray-800";
+                          ? "bg-yellow-100  text-yellow-800 "
+                          : "bg-red-100 text-red-800 "
+                        : "bg-gray-100  text-gray-800 ";
                     return (
                       <li
                         key={item.id}
@@ -393,7 +394,7 @@ const Dashboard = () => {
               </p>
 
               <div className="max-w-xl mx-auto space-y-6">
-                <div className="border-2 border-dashed border-gray-300 rounded-xl p-10 hover:border-indigo-500 transition-colors bg-gray-50">
+                <div className="border-2 border-dashed border-gray-300  rounded-xl p-10 hover:border-indigo-500  transition-colors bg-gray-50 ">
                   <input
                     type="file"
                     accept=".pdf"
@@ -405,15 +406,15 @@ const Dashboard = () => {
                     htmlFor="resume-upload"
                     className="cursor-pointer flex flex-col items-center"
                   >
-                    <Upload className="h-16 w-16 text-indigo-500 mb-4" />
-                    <span className="text-lg font-medium text-gray-700">
+                    <Upload className="h-16 w-16 text-indigo-500  mb-4" />
+                    <span className="text-lg font-medium text-gray-700 ">
                       Click to upload PDF
                     </span>
-                    <span className="text-sm text-gray-500 mt-1">
+                    <span className="text-sm text-gray-500  mt-1">
                       Max 2 pages
                     </span>
                     {file && (
-                      <span className="mt-4 inline-block bg-indigo-100 text-indigo-800 px-3 py-1 rounded-full text-sm font-medium">
+                      <span className="mt-4 inline-block bg-indigo-100  text-indigo-800  px-3 py-1 rounded-full text-sm font-medium">
                         {file.name}
                       </span>
                     )}
@@ -434,11 +435,11 @@ const Dashboard = () => {
                     onChange={handleJobDescriptionChange}
                     placeholder="Paste the job description here to get personalized matching scores and improvement suggestions..."
                     rows={6}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm"
+                    className="w-full px-4 py-3 border border-gray-300    rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none text-sm outline-0"
                   />
-                  <p className="mt-1 text-xs text-gray-500">
+                  {/* <p className="mt-1 text-xs text-gray-500">
                     Minimum 50 characters and 10 words if provided
-                  </p>
+                  </p> */}
                 </div>
 
                 <button
@@ -454,7 +455,7 @@ const Dashboard = () => {
                 >
                   {/* Progress bar background */}
                   <span
-                    className="absolute inset-0 bg-linear-to-r from-sky-300 to-sky-500 transition-all duration-700 ease-out"
+                    className="absolute inset-0 bg-gradient-to-r from-sky-300 to-sky-500 transition-all duration-700 ease-out"
                     style={{
                       width: loading ? `${progressPercent}%` : "0%",
                       opacity: loading ? 0.4 : 0,
@@ -463,7 +464,7 @@ const Dashboard = () => {
 
                   {/* Subtle shimmer animation during processing */}
                   {loading && processingPhase !== "uploading" && (
-                    <span className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent animate-pulse" />
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-pulse" />
                   )}
 
                   <span className="relative flex items-center justify-center gap-2 py-4 px-6">
@@ -500,7 +501,7 @@ const Dashboard = () => {
                   </span>
                 </button>
                 {error && (
-                  <div className="mt-4 p-4 bg-red-50 text-red-700 rounded-lg flex items-center justify-center">
+                  <div className="mt-4 p-4 bg-red-50  text-red-700  rounded-lg flex items-center justify-center">
                     <AlertCircle className="h-5 w-5 mr-2" />
                     {error}
                   </div>
@@ -513,27 +514,27 @@ const Dashboard = () => {
           {analysis && (
             <div className="space-y-6 animate-fade-in">
               {/* Score Header */}
-              <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between border-l-4 sm:border-l-8 border-indigo-600">
+              <div className="bg-white rounded-xl shadow-sm p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between border-l-4 sm:border-l-8 border-indigo-600 ">
                 <div className="w-full md:w-auto text-center md:text-left mb-4 md:mb-0">
-                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 ">
                     Analysis Results
                   </h2>
-                  <p className="text-gray-500 mt-1 text-sm sm:text-base">
+                  <p className="text-gray-500  mt-1 text-sm sm:text-base">
                     Here is how your resume performs.
                   </p>
                 </div>
                 <div className="mt-4 md:mt-0 flex items-center">
                   <div className="text-right mr-4">
-                    <p className="text-xs sm:text-sm text-gray-500 uppercase tracking-wide font-semibold">
+                    <p className="text-xs sm:text-sm text-gray-500  uppercase tracking-wide font-semibold">
                       Resume Score
                     </p>
                     <p
                       className={`text-4xl sm:text-5xl font-extrabold ${
                         analysis.atsScore >= 80
-                          ? "text-green-600"
+                          ? "text-green-600 "
                           : analysis.atsScore >= 60
-                          ? "text-yellow-500"
-                          : "text-red-500"
+                          ? "text-yellow-500 "
+                          : "text-red-500 "
                       }`}
                     >
                       {analysis.atsScore}/100
@@ -542,19 +543,19 @@ const Dashboard = () => {
                   <div
                     className={`h-12 w-12 sm:h-16 sm:w-16 rounded-full flex items-center justify-center shrink-0 ${
                       analysis.atsScore >= 80
-                        ? "bg-green-100"
+                        ? "bg-green-100 "
                         : analysis.atsScore >= 60
-                        ? "bg-yellow-100"
-                        : "bg-red-100"
+                        ? "bg-yellow-100 "
+                        : "bg-red-100 "
                     }`}
                   >
                     <CheckCircle
                       className={`h-6 w-6 sm:h-8 sm:w-8 ${
                         analysis.atsScore >= 80
-                          ? "text-green-600"
+                          ? "text-green-600 "
                           : analysis.atsScore >= 60
-                          ? "text-yellow-600"
-                          : "text-red-600"
+                          ? "text-yellow-600 "
+                          : "text-red-600 "
                       }`}
                     />
                   </div>
@@ -568,18 +569,18 @@ const Dashboard = () => {
                     ([section, score]) => (
                       <div
                         key={section}
-                        className="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+                        className="bg-white  p-6 rounded-xl shadow-sm border border-gray-100 "
                       >
-                        <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">
+                        <h3 className="text-sm font-semibold text-gray-500  uppercase mb-2">
                           {section}
                         </h3>
                         <p
                           className={`text-2xl font-bold ${
                             score === "High"
-                              ? "text-green-600"
+                              ? "text-green-600 "
                               : score === "Medium"
-                              ? "text-yellow-600"
-                              : "text-red-600"
+                              ? "text-yellow-600 "
+                              : "text-red-600 "
                           }`}
                         >
                           {score}
@@ -591,24 +592,24 @@ const Dashboard = () => {
 
               {/* Job Description Matching Section */}
               {analysis.jdMatch && (
-                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm p-8 border-2 border-purple-200">
+                <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl shadow-sm p-8 border-2 border-purple-200 ">
                   <div className="flex items-center mb-6">
-                    <FileText className="h-8 w-8 text-purple-600 mr-3" />
-                    <h2 className="text-2xl font-bold text-gray-900">
+                    <FileText className="h-8 w-8 text-purple-600  mr-3" />
+                    <h2 className="text-2xl font-bold text-gray-900 ">
                       Job Description Match Analysis
                     </h2>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     {/* Similarity Score */}
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">
+                    <div className="bg-white  rounded-lg p-6 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-500  uppercase mb-2">
                         Similarity Score
                       </h3>
-                      <p className="text-3xl font-bold text-purple-600 mb-1">
+                      <p className="text-3xl font-bold text-purple-600  mb-1">
                         {analysis.jdMatch.similarityScore}/100
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 ">
                         How well your resume matches the job requirements
                       </p>
                       <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
@@ -628,17 +629,17 @@ const Dashboard = () => {
                     </div>
 
                     {/* Qualification Score */}
-                    <div className="bg-white rounded-lg p-6 shadow-sm">
-                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-2">
+                    <div className="bg-white  rounded-lg p-6 shadow-sm">
+                      <h3 className="text-sm font-semibold text-gray-500  uppercase mb-2">
                         Qualification Score
                       </h3>
-                      <p className="text-3xl font-bold text-indigo-600 mb-1">
+                      <p className="text-3xl font-bold text-indigo-600  mb-1">
                         {analysis.jdMatch.qualificationScore}/100
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 ">
                         How qualified you appear for this specific role
                       </p>
-                      <div className="mt-3 w-full bg-gray-200 rounded-full h-2">
+                      <div className="mt-3 w-full bg-gray-200  rounded-full h-2">
                         <div
                           className={`h-2 rounded-full ${
                             analysis.jdMatch.qualificationScore >= 80
@@ -658,9 +659,9 @@ const Dashboard = () => {
                   {/* Improvement Suggestions */}
                   {analysis.jdMatch.improvementSuggestions &&
                     analysis.jdMatch.improvementSuggestions.length > 0 && (
-                      <div className="bg-white rounded-lg p-6 shadow-sm">
-                        <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                          <CheckCircle className="h-5 w-5 text-purple-600 mr-2" />
+                          <div className="bg-white  rounded-lg p-6 shadow-sm">
+                        <h3 className="text-lg font-bold text-gray-900  mb-4 flex items-center">
+                          <CheckCircle className="h-5 w-5 text-purple-600  mr-2" />
                           Improvement Suggestions for This Job
                         </h3>
                         <ul className="space-y-3">
@@ -668,10 +669,10 @@ const Dashboard = () => {
                             (suggestion, idx) => (
                               <li
                                 key={idx}
-                                className="flex items-start text-gray-700"
+                                className="flex items-start text-gray-700 "
                               >
-                                <span className="mr-3 mt-1.5 h-1.5 w-1.5 bg-purple-400 rounded-full shrink-0"></span>
-                                <div className="prose prose-sm max-w-none">
+                                <span className="mr-3 mt-1.5 h-1.5 w-1.5 bg-purple-400  rounded-full shrink-0"></span>
+                                <div className="prose prose-sm  max-w-none">
                                   <ReactMarkdown>{suggestion}</ReactMarkdown>
                                 </div>
                               </li>
@@ -686,10 +687,10 @@ const Dashboard = () => {
               {/* Improvements Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                 {/* Missing Info */}
-                <div className="bg-white rounded-xl shadow-sm p-6 border-t-4 border-red-400">
+                <div className="bg-white  rounded-xl shadow-sm p-6 border-t-4 border-red-400 ">
                   <div className="flex items-center mb-4">
-                    <AlertCircle className="h-6 w-6 text-red-500 mr-2" />
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <AlertCircle className="h-6 w-6 text-red-500  mr-2" />
+                    <h3 className="text-xl font-bold text-gray-900 ">
                       Missing Information
                     </h3>
                   </div>
@@ -698,9 +699,9 @@ const Dashboard = () => {
                       analysis.missingInfo.map((item, idx) => (
                         <li
                           key={idx}
-                          className="flex items-start text-gray-700"
+                          className="flex items-start text-gray-700 "
                         >
-                          <span className="mr-3 mt-1.5 h-1.5 w-1.5 bg-red-400 rounded-full shrink-0"></span>
+                          <span className="mr-3 mt-1.5 h-1.5 w-1.5 bg-red-400  rounded-full shrink-0"></span>
                           <span>{item}</span>
                         </li>
                       ))}
@@ -708,19 +709,19 @@ const Dashboard = () => {
                 </div>
 
                 {/* Corrections */}
-                <div className="bg-white rounded-xl shadow-sm p-6 border-t-4 border-indigo-500">
+                <div className="bg-white  rounded-xl shadow-sm p-6 border-t-4 border-indigo-500 ">
                   <div className="flex items-center mb-4">
-                    <CheckCircle className="h-6 w-6 text-indigo-500 mr-2" />
-                    <h3 className="text-xl font-bold text-gray-900">
+                    <CheckCircle className="h-6 w-6 text-indigo-500  mr-2" />
+                    <h3 className="text-xl font-bold text-gray-900 ">
                       Corrections
                     </h3>
                   </div>
-                  <div className="space-y-3 text-gray-700 text-sm">
+                  <div className="space-y-3 text-gray-700  text-sm">
                     {analysis.corrections &&
                       analysis.corrections.map((item, idx) => (
                         <div key={idx} className="flex items-start">
-                          <span className="mr-3 mt-1.5 h-1.5 w-1.5 bg-indigo-400 rounded-full shrink-0"></span>
-                          <div className="prose prose-sm max-w-none">
+                          <span className="mr-3 mt-1.5 h-1.5 w-1.5 bg-indigo-400  rounded-full shrink-0"></span>
+                          <div className="prose prose-sm  max-w-none">
                             <ReactMarkdown>{item}</ReactMarkdown>
                           </div>
                         </div>
@@ -733,7 +734,7 @@ const Dashboard = () => {
               <div className="flex justify-center mt-8">
                 <button
                   onClick={resetAnalysis}
-                  className="flex items-center px-8 py-4 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-colors cursor-pointer shadow-lg"
+                        className="flex items-center px-8 py-4 bg-gray-900  text-white  rounded-xl font-bold hover:bg-gray-800  transition-colors cursor-pointer shadow-lg"
                 >
                   <RotateCcw className="mr-2 h-5 w-5" />
                   Analyze Another Resume
@@ -743,6 +744,7 @@ const Dashboard = () => {
           )}
         </div>
       </main>
+      
     </div>
   );
 };

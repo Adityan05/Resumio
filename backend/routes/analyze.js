@@ -16,7 +16,15 @@ const {
 } = require("../utils/constants");
 
 const router = express.Router();
-const upload = multer({ dest: "uploads/" });
+// Use memory storage instead of disk storage to avoid saving files unnecessarily
+// Files are read into buffer anyway, so no need to save to disk
+const storage = multer.memoryStorage();
+const upload = multer({ 
+  storage: storage,
+  limits: {
+    fileSize: MAX_UPLOAD_SIZE_BYTES
+  }
+});
 
 // Store active progress sessions
 const progressSessions = new Map();
@@ -154,10 +162,25 @@ router.post(
   authenticateToken,
   upload.single("resume"),
   async (req, res) => {
-    let filePath;
     const sessionId = req.headers['x-session-id'] || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     const userId = req.user.userId;
     const CREDITS_PER_SCAN = 10;
+    let creditsDeducted = false; // Track if credits were deducted
+    
+    // Helper function to refund credits if they were deducted
+    const refundCredits = async () => {
+      if (creditsDeducted) {
+        try {
+          await prisma.user.update({
+            where: { id: userId },
+            data: { credits: { increment: CREDITS_PER_SCAN } }
+          });
+          creditsDeducted = false;
+        } catch (refundError) {
+          console.error("Failed to refund credits:", refundError);
+        }
+      }
+    };
     
     try {
       // Check if user has enough credits
@@ -176,22 +199,36 @@ router.post(
         });
       }
 
-      if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+      // Deduct credits immediately to prevent concurrency issues
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          credits: {
+            decrement: CREDITS_PER_SCAN
+          }
+        }
+      });
+      creditsDeducted = true;
+
+      if (!req.file) {
+        await refundCredits();
+        return res.status(400).json({ error: "No file uploaded" });
+      }
 
       if (req.file.size > MAX_UPLOAD_SIZE_BYTES) {
-        await deleteFileSafe(req.file.path);
+        await refundCredits();
         return res.status(400).json({ error: "File exceeds 5MB limit." });
       }
 
       if (req.file.mimetype !== "application/pdf") {
-        await deleteFileSafe(req.file.path);
+        await refundCredits();
         return res
           .status(400)
           .json({ error: "Only PDF resumes are supported." });
       }
 
-      filePath = req.file.path;
-      const dataBuffer = fs.readFileSync(filePath);
+      // Get file buffer directly from memory storage
+      const dataBuffer = req.file.buffer;
 
       // Send progress: Starting PDF parsing
       sendProgress(sessionId, 'parsing', 20, 'Parsing PDF content...');
@@ -215,7 +252,7 @@ router.post(
 
       // Check page count
       if (numpages > 2) {
-        await deleteFileSafe(filePath);
+        await refundCredits();
         return res
           .status(400)
           .json({ error: "Uploaded PDF has more than 2 pages." });
@@ -227,7 +264,11 @@ router.post(
           sendProgress(sessionId, 'ocr', 45, 'Text insufficient, sending to OCR backend...');
           console.log("Text insufficient, attempting OCR...");
           const formData = new FormData();
-          formData.append("file", fs.createReadStream(filePath));
+          // Send buffer directly with original filename
+          formData.append("file", dataBuffer, {
+            filename: req.file.originalname || 'resume.pdf',
+            contentType: 'application/pdf'
+          });
 
           const ocrUrl = process.env.OCR_API_URL || "http://localhost:8000/ocr";
           const ocrResponse = await axios.post(ocrUrl, formData, {
@@ -252,7 +293,7 @@ router.post(
       }
 
       if (!text || !text.trim()) {
-        await deleteFileSafe(filePath);
+        await refundCredits();
         return res
           .status(400)
           .json({ error: "Could not extract text from resume." });
@@ -260,7 +301,7 @@ router.post(
 
       const resumeCheck = validateResumeContent(text);
       if (!resumeCheck.isValid) {
-        await deleteFileSafe(filePath);
+        await refundCredits();
         return res.status(400).json({ error: resumeCheck.message });
       }
 
@@ -359,7 +400,7 @@ router.post(
         } catch (retryError) {
           console.error("JSON Parse Error", retryError);
           console.error("Raw Response:", textResponse);
-          await deleteFileSafe(filePath);
+          await refundCredits();
           return res
             .status(500)
             .json({
@@ -369,23 +410,16 @@ router.post(
         }
       }
 
-      // 4. Save to DB + enforce rolling history (max 50 per user) + deduct credits
+      // 4. Save to DB + enforce rolling history (max 50 per user)
+      // Credits already deducted above, so no need to deduct again
+      // Since we're using memory storage, store a reference instead of file path
+      const fileReference = `memory:${userId}:${Date.now()}`;
       await prisma.$transaction(async (tx) => {
-        // Deduct credits
-        await tx.user.update({
-          where: { id: userId },
-          data: {
-            credits: {
-              decrement: CREDITS_PER_SCAN
-            }
-          }
-        });
-
         const resume = await tx.resume.create({
           data: {
             userId: userId,
             fileName: req.file.originalname,
-            filePath: filePath,
+            filePath: fileReference, // Store reference instead of actual path
           },
         });
 
@@ -427,11 +461,9 @@ router.post(
         }, 1000);
 
         res.json({ ...analysisData, sessionId });
-
-        await deleteFileSafe(filePath);
     } catch (error) {
       console.error(error);
-      await deleteFileSafe(filePath || (req.file && req.file.path));
+      await refundCredits(); // Refund credits on any error
       const message =
         error.message === "File too large"
           ? "File exceeds the allowed size limit."

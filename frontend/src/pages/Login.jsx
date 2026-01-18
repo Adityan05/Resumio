@@ -61,47 +61,47 @@ const Login = () => {
         {/* Left side - Branding and Info */}
         <div className="hidden lg:block space-y-6 text-center lg:text-left">
           <div className="flex items-center justify-center lg:justify-start space-x-3 mb-6">
-            <FileCheck className="h-10 w-10 text-indigo-600" />
-            <h1 className="text-4xl font-bold text-indigo-600">Resumio</h1>
+            <FileCheck className="h-10 w-10 text-indigo-600 " />
+            <h1 className="text-4xl font-bold text-indigo-600 ">Resumio</h1>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-gray-900 ">
             AI-Powered Resume Analysis
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 ">
             Get instant feedback to improve your ATS score and land your dream
             job.
           </p>
 
           <div className="grid grid-cols-1 gap-4 mt-8">
-            <div className="flex items-start space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-              <Sparkles className="h-6 w-6 text-indigo-600 flex-shrink-0 mt-1" />
+              <div className="flex items-start space-x-3 p-4 bg-white/80  backdrop-blur-sm rounded-lg shadow-sm">
+              <Sparkles className="h-6 w-6 text-indigo-600  flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 ">
                   AI-Powered Analysis
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 ">
                   Get detailed insights powered by advanced AI technology
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-              <TrendingUp className="h-6 w-6 text-indigo-600 flex-shrink-0 mt-1" />
+              <div className="flex items-start space-x-3 p-4 bg-white/80  backdrop-blur-sm rounded-lg shadow-sm">
+              <TrendingUp className="h-6 w-6 text-indigo-600  flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 ">
                   Improve ATS Score
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 ">
                   Optimize your resume to pass Applicant Tracking Systems
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-              <Shield className="h-6 w-6 text-indigo-600 flex-shrink-0 mt-1" />
+              <div className="flex items-start space-x-3 p-4 bg-white/80  backdrop-blur-sm rounded-lg shadow-sm">
+              <Shield className="h-6 w-6 text-indigo-600  flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 ">
                   Job Description Matching
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 ">
                   See how well your resume matches specific job requirements
                 </p>
               </div>
@@ -110,22 +110,23 @@ const Login = () => {
         </div>
 
         {/* Right side - Login Form */}
-        <div className="w-full space-y-8 p-6 sm:p-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-xl">
+        <div className="w-full space-y-8 p-6 sm:p-8 bg-white/90  backdrop-blur-sm rounded-xl shadow-xl">
           {/* Mobile Branding */}
           <div className="lg:hidden flex items-center justify-center space-x-3 mb-6">
-            <FileCheck className="h-8 w-8 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-indigo-600">Resumio</h1>
+            <FileCheck className="h-8 w-8 text-indigo-600 " />
+            <h1 className="text-3xl font-bold text-indigo-600 ">Resumio</h1>
           </div>
 
+
           <div className="text-center">
-            <h2 className="mt-6 text-2xl sm:text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-2xl sm:text-3xl font-extrabold text-gray-900 ">
               Sign in to your account
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-600 ">
               Or{" "}
               <Link
                 to="/register"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-indigo-600  hover:text-indigo-500 "
               >
                 create a new account
               </Link>
@@ -179,18 +180,18 @@ const Login = () => {
                 <input
                   type="email"
                   required
-                  className="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                  className="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300  placeholder-gray-500  text-gray-900  rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="Email address"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="relative">
-                <Lock className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+                <Lock className="absolute top-3 left-3 h-5 w-5 text-gray-400 " />
                 <input
                   type="password"
                   required
-                  className="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+                                className="appearance-none rounded-none relative block w-full px-10 py-3 border border-gray-300  placeholder-gray-500  text-gray-900  rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -211,6 +212,7 @@ const Login = () => {
           </form>
         </div>
       </div>
+      
     </div>
   );
 };

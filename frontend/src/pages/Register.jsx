@@ -25,7 +25,7 @@ const Register = () => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
+  
   const validateForm = () => {
     const newErrors = {};
 
@@ -102,7 +102,7 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4 py-8 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50  px-4 py-8 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-indigo-200 rounded-full mix-blend-multiply filter blur-xl opacity-30 animate-blob"></div>
@@ -114,46 +114,46 @@ const Register = () => {
         {/* Left side - Branding and Info */}
         <div className="hidden lg:block space-y-6 text-center lg:text-left">
           <div className="flex items-center justify-center lg:justify-start space-x-3 mb-6">
-            <FileCheck className="h-10 w-10 text-indigo-600" />
-            <h1 className="text-4xl font-bold text-indigo-600">Resumio</h1>
+            <FileCheck className="h-10 w-10 text-indigo-600 " />
+            <h1 className="text-4xl font-bold text-indigo-600 ">Resumio</h1>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">
+          <h2 className="text-3xl font-bold text-gray-900 ">
             Start Your Journey Today
           </h2>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 ">
             Join thousands of job seekers improving their resumes with
             AI-powered analysis.
           </p>
 
           <div className="grid grid-cols-1 gap-4 mt-8">
-            <div className="flex items-start space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-              <Coins className="h-6 w-6 text-yellow-600 flex-shrink-0 mt-1" />
+                <div className="flex items-start space-x-3 p-4 bg-white/80  backdrop-blur-sm rounded-lg shadow-sm">
+              <Coins className="h-6 w-6 text-yellow-600  flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-gray-900">50 Free Credits</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-semibold text-gray-900 ">50 Free Credits</h3>
+                <p className="text-sm text-gray-600 ">
                   Get started with 50 free credits to analyze your resume
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-              <Sparkles className="h-6 w-6 text-indigo-600 flex-shrink-0 mt-1" />
+              <div className="flex items-start space-x-3 p-4 bg-white/80  backdrop-blur-sm rounded-lg shadow-sm">
+              <Sparkles className="h-6 w-6 text-indigo-600  flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 ">
                   Instant Feedback
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 ">
                   Receive detailed analysis and improvement suggestions in
                   seconds
                 </p>
               </div>
             </div>
-            <div className="flex items-start space-x-3 p-4 bg-white/80 backdrop-blur-sm rounded-lg shadow-sm">
-              <TrendingUp className="h-6 w-6 text-indigo-600 flex-shrink-0 mt-1" />
+              <div className="flex items-start space-x-3 p-4 bg-white/80  backdrop-blur-sm rounded-lg shadow-sm">
+              <TrendingUp className="h-6 w-6 text-indigo-600  flex-shrink-0 mt-1" />
               <div>
-                <h3 className="font-semibold text-gray-900">
+                <h3 className="font-semibold text-gray-900 ">
                   Boost Your Career
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 ">
                   Increase your chances of landing interviews with optimized
                   resumes
                 </p>
@@ -163,22 +163,24 @@ const Register = () => {
         </div>
 
         {/* Right side - Register Form */}
-        <div className="w-full space-y-8 p-6 sm:p-8 bg-white/90 backdrop-blur-sm rounded-xl shadow-xl">
+        <div className="w-full space-y-8 p-6 sm:p-8 bg-white/90  backdrop-blur-sm rounded-xl shadow-xl">
           {/* Mobile Branding */}
           <div className="lg:hidden flex items-center justify-center space-x-3 mb-6">
-            <FileCheck className="h-8 w-8 text-indigo-600" />
-            <h1 className="text-3xl font-bold text-indigo-600">Resumio</h1>
+            <FileCheck className="h-8 w-8 text-indigo-600 " />
+            <h1 className="text-3xl font-bold text-indigo-600 ">Resumio</h1>
           </div>
 
+          
+
           <div className="text-center">
-            <h2 className="mt-6 text-2xl sm:text-3xl font-extrabold text-gray-900">
+            <h2 className="mt-6 text-2xl sm:text-3xl font-extrabold text-gray-900 ">
               Create your account
             </h2>
-            <p className="mt-2 text-sm text-gray-600">
+            <p className="mt-2 text-sm text-gray-600 ">
               Already have an account?{" "}
               <Link
                 to="/login"
-                className="font-medium text-indigo-600 hover:text-indigo-500"
+                className="font-medium text-indigo-600  hover:text-indigo-500 "
               >
                 Sign in
               </Link>
@@ -233,8 +235,8 @@ const Register = () => {
                   <input
                     type="text"
                     className={`appearance-none relative block w-full px-10 py-3 border ${
-                      errors.name ? "border-red-300" : "border-gray-300"
-                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                      errors.name ? "border-red-300 " : "border-gray-300 "
+                    }   placeholder-gray-500  text-gray-900  rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
                     placeholder="Full Name"
                     value={name}
                     onChange={(e) => {
@@ -246,7 +248,7 @@ const Register = () => {
                   />
                 </div>
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="mt-1 text-sm text-red-600  flex items-center">
                     <AlertCircle className="h-4 w-4 mr-1" />
                     {errors.name}
                   </p>
@@ -254,12 +256,12 @@ const Register = () => {
               </div>
               <div>
                 <div className="relative">
-                  <Mail className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+                  <Mail className="absolute top-3 left-3 h-5 w-5 text-gray-400 " />
                   <input
                     type="email"
                     className={`appearance-none relative block w-full px-10 py-3 border ${
-                      errors.email ? "border-red-300" : "border-gray-300"
-                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                      errors.email ? "border-red-300 " : "border-gray-300 "
+                    }   placeholder-gray-500  text-gray-900  rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
                     placeholder="Email address"
                     value={email}
                     onChange={(e) => {
@@ -271,7 +273,7 @@ const Register = () => {
                   />
                 </div>
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="mt-1 text-sm text-red-600  flex items-center">
                     <AlertCircle className="h-4 w-4 mr-1" />
                     {errors.email}
                   </p>
@@ -279,12 +281,12 @@ const Register = () => {
               </div>
               <div>
                 <div className="relative">
-                  <Lock className="absolute top-3 left-3 h-5 w-5 text-gray-400" />
+                  <Lock className="absolute top-3 left-3 h-5 w-5 text-gray-400 " />
                   <input
                     type="password"
                     className={`appearance-none relative block w-full px-10 py-3 border ${
-                      errors.password ? "border-red-300" : "border-gray-300"
-                    } placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
+                      errors.password ? "border-red-300 " : "border-gray-300 "
+                    }   placeholder-gray-500  text-gray-900  rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm`}
                     placeholder="Password"
                     value={password}
                     onChange={(e) => {
@@ -296,12 +298,12 @@ const Register = () => {
                   />
                 </div>
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600 flex items-center">
+                  <p className="mt-1 text-sm text-red-600  flex items-center">
                     <AlertCircle className="h-4 w-4 mr-1" />
                     {errors.password}
                   </p>
                 )}
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-500 ">
                   Password must be at least 8 characters with uppercase,
                   lowercase, and a number
                 </p>
@@ -321,6 +323,7 @@ const Register = () => {
           </form>
         </div>
       </div>
+    
     </div>
   );
 };
