@@ -1,27 +1,25 @@
-FROM python:3.14-slim
+FROM python:3.12-slim
 
-# ---- Install Tesseract and Poppler ----
-RUN apt-get update && \
-    apt-get install -y tesseract-ocr poppler-utils && \
-    rm -rf /var/lib/apt/lists/*
+# Install Tesseract and system dependencies
+RUN apt-get update && apt-get install -y \
+    tesseract-ocr \
+    tesseract-ocr-eng \
+    poppler-utils \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgl1 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
-# ---- Set working directory ----
 WORKDIR /app
 
-# ---- Copy project files ----
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
 
-# ---- Install Python dependencies ----
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
-
-# ---- Expose port ----
 EXPOSE 8000
 
-# ---- Set environment variables ----
-ENV FLASK_DEBUG=False
-ENV PORT=8000
-
-# ---- Start server (production) ----
-# Most platforms will use this, or you can override with your platform's command
-CMD ["python", "main.py"]
+CMD gunicorn app:app --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120

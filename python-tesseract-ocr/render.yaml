@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: resumio-ocr
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
