@@ -58,7 +58,7 @@ def ocr_only():
         logger.info("Starting OCR processing...")
         
         # Convert PDF to images
-        images = convert_from_bytes(pdf_bytes, dpi=300, first_page=1, last_page=5)
+        images = convert_from_bytes(pdf_bytes, dpi=150, first_page=1, last_page=3)
         
         # OCR each page
         text = ''
