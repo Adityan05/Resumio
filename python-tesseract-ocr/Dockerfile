@@ -25,6 +25,7 @@
 # CMD gunicorn app:app --bind 0.0.0.0:${PORT:-8000} --workers 2 --timeout 120
 FROM python:3.12-slim
 
+# Install Tesseract and system dependencies
 RUN apt-get update && apt-get install -y \
     tesseract-ocr \
     tesseract-ocr-eng \
@@ -44,6 +45,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-EXPOSE 8000
+# Hugging Face uses port 7860
+EXPOSE 7860
 
-CMD gunicorn app:app --bind 0.0.0.0:${PORT:-8000} --workers 1 --timeout 300
+CMD gunicorn app:app --bind 0.0.0.0:7860 --workers 1 --timeout 300
